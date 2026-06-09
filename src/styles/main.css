@@ -1,0 +1,244 @@
+@import "./tokens.css";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-base);
+  background: var(--navy);
+  color: var(--white);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Primary button - cyan on navy, spec 3 */
+.btn-primary {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  background: var(--cyan);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 16px;
+  color: var(--cyan);
+  background: transparent;
+  border: 1px solid var(--cyan);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-primary:active {
+  filter: brightness(1.1);
+}
+
+/* --- Entry screen (spec 3) --- */
+.entry-screen {
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px calc(24px + var(--safe-top)) 24px 24px;
+  text-align: center;
+}
+.entry-logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan);
+}
+.entry-title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+}
+.entry-subtitle {
+  color: var(--cyan);
+  font-size: 16px;
+}
+.entry-start {
+  max-width: 360px;
+  margin-top: 8px;
+}
+.entry-tagline {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+/* --- Game screen (spec 4) - full-bleed map + floating HUD --- */
+/* keeps position:absolute + inset:0 from .screen so it fills the viewport;
+   that also makes it the positioning context for the HUD overlays */
+.game-screen {
+  overflow: hidden;
+  background: #02060f;
+}
+.game-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.arena-overlay {
+  position: absolute;
+  inset: 0;
+  padding: calc(12px + var(--safe-top)) 14px 0;
+  pointer-events: none;
+}
+
+/* Glass HUD panels floating on the map */
+.hud-panel {
+  position: absolute;
+  top: calc(12px + var(--safe-top));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(5, 13, 26, 0.55);
+  border: 1px solid rgba(0, 180, 216, 0.45);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+}
+.hud-score {
+  inset-inline-start: 14px;
+}
+.hud-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+}
+.hud-score-val {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cyan);
+  font-variant-numeric: tabular-nums;
+}
+.hud-timer {
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 18px;
+}
+.hud-timer-val {
+  font-family: var(--font-mono);
+  font-size: var(--fs-timer);
+  font-weight: 500;
+  color: var(--white);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lives - top-right, part of the game world (no header bar) */
+.hud-lives {
+  position: absolute;
+  top: calc(14px + var(--safe-top));
+  inset-inline-end: 16px;
+  display: flex;
+  gap: 6px;
+}
+.heart {
+  width: 26px;
+  height: 26px;
+  fill: var(--red);
+  filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.85))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+.heart.lost {
+  fill: rgba(255, 255, 255, 0.12);
+  filter: none;
+}
+
+.debug-end {
+  position: absolute;
+  bottom: calc(14px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  padding: 8px 16px;
+  pointer-events: auto;
+  background: rgba(5, 13, 26, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* --- End screen (spec 5) --- */
+.end-screen {
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  text-align: center;
+}
+.end-title {
+  font-size: 24px;
+  font-weight: 700;
+}
+.end-title.is-success {
+  color: var(--green);
+}
+.end-title.is-fail {
+  color: var(--red);
+}
+.end-score {
+  font-size: var(--fs-score);
+  font-weight: 700;
+  color: var(--cyan);
+  line-height: 1;
+}
+.end-cards {
+  display: flex;
+  gap: 16px;
+}
+.end-card {
+  background: var(--navy-deep);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.end-card span {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.end-card strong {
+  font-size: 22px;
+}
+.end-replay {
+  max-width: 360px;
+}

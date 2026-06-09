@@ -1,0 +1,29 @@
+:root {
+  /* Palette - spec 6.1 */
+  --navy: #050d1a;
+  --navy-deep: #0a2647;
+  --blue: #0e6ba8;
+  --cyan: #00b4d8;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --white: #ffffff;
+
+  /* Typography - spec 6.3 */
+  --font-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace;
+
+  --fs-title: clamp(32px, 9vw, 40px);
+  --fs-score: clamp(56px, 18vw, 72px);
+  --fs-timer: clamp(20px, 6vw, 24px);
+  --fs-city: 10px;
+  --fs-craft-tag: 9px;
+
+  /* Layout */
+  --hud-height: 50px;
+  --stats-height: 50px;
+  --radius: 12px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
