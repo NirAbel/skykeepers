@@ -72,9 +72,9 @@ export function randomSpawnEdge(): Vec {
     // left no time or space to intercept near Haifa/Tel Aviv.
     return { x: -0.05, y: -0.04 + Math.random() * 0.16 };
   } else if (side < 0.9) {
-    // east — start at ~azimuth 060 (not 050); the top-right corner sits
-    // under the lives HUD where an incoming craft is hard to spot.
-    return { x: 1.05, y: 0.18 + Math.random() * 0.42 };
+    // east — enter below the top-right intel feed/HUD, which would otherwise
+    // hide an incoming craft. Band starts mid-map and runs toward the south.
+    return { x: 1.05, y: 0.36 + Math.random() * 0.34 };
   } else {
     // south
     return { x: 0.35 + Math.random() * 0.3, y: 1.05 };

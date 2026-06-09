@@ -251,7 +251,7 @@ export class GameEngine {
   // Push the live-enemy intelligence feed, but only when it actually changes.
   private maybeEmitIntel(): void {
     const items: IntelItem[] = this.crafts
-      .filter((c) => c.alive)
+      .filter((c) => c.alive && c.spec.allegiance === "hostile")
       .map((c) => ({
         id: c.id,
         text: `${c.spec.intel} מגיע ${this.approachFrom(c.vel)}`,
