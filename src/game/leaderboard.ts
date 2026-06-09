@@ -1,6 +1,7 @@
-// Local high-score table. Persists to localStorage on this device only;
-// a shared cloud leaderboard (Supabase / Netlify) is a later swap behind
-// these same functions.
+// Shared cloud high-score table, served by the Netlify Function at ENDPOINT
+// (Netlify Blobs store). localStorage is kept as an offline cache + fallback
+// so the board still renders when the function is unreachable (e.g. `vite`
+// dev with no functions runtime, or a network blip).
 
 export interface ScoreEntry {
   name: string;
@@ -10,35 +11,68 @@ export interface ScoreEntry {
   ts: number; // epoch ms — also used to highlight the just-saved row
 }
 
-const SCORES_KEY = "sk_scores_v1";
+const ENDPOINT = "/.netlify/functions/leaderboard";
+const CACHE_KEY = "sk_scores_v1";
 const NICK_KEY = "sk_nick_v1";
 const MAX_ROWS = 10;
 export const NICK_MAX = 12;
 
-export function loadScores(): ScoreEntry[] {
+function readCache(): ScoreEntry[] {
   try {
-    const arr = JSON.parse(localStorage.getItem(SCORES_KEY) ?? "[]");
+    const arr = JSON.parse(localStorage.getItem(CACHE_KEY) ?? "[]");
     return Array.isArray(arr) ? (arr as ScoreEntry[]) : [];
   } catch {
     return [];
   }
 }
 
-// Insert a result, keep the top MAX_ROWS by score, and report the new
-// entry's 1-based rank within the full (untrimmed) ranking.
-export function saveScore(entry: ScoreEntry): {
+function writeCache(board: ScoreEntry[]): void {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(board));
+  } catch {
+    /* quota / private-mode — ignore */
+  }
+}
+
+// Fetch the shared board; on any failure fall back to the local cache.
+export async function loadScores(): Promise<ScoreEntry[]> {
+  try {
+    const res = await fetch(ENDPOINT, { method: "GET" });
+    if (!res.ok) throw new Error(String(res.status));
+    const board = (await res.json()) as ScoreEntry[];
+    const trimmed = board.slice(0, MAX_ROWS);
+    writeCache(trimmed);
+    return trimmed;
+  } catch {
+    return readCache();
+  }
+}
+
+// Submit a result. Returns the server-assigned rank + board; `shared` is false
+// when we fell back to a local-only ranking (function unreachable).
+export async function saveScore(entry: ScoreEntry): Promise<{
   rank: number;
   board: ScoreEntry[];
-} {
-  const all = [...loadScores(), entry].sort((a, b) => b.score - a.score);
-  const rank = all.indexOf(entry) + 1;
-  const board = all.slice(0, MAX_ROWS);
+  shared: boolean;
+}> {
   try {
-    localStorage.setItem(SCORES_KEY, JSON.stringify(board));
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(entry),
+    });
+    if (!res.ok) throw new Error(String(res.status));
+    const data = (await res.json()) as { rank: number; board: ScoreEntry[] };
+    const board = data.board.slice(0, MAX_ROWS);
+    writeCache(board);
+    return { rank: data.rank, board, shared: true };
   } catch {
-    /* quota / private-mode — keep the in-memory board */
+    const all = [...readCache(), entry].sort((a, b) => b.score - a.score);
+    const rank = all.indexOf(entry) + 1;
+    const board = all.slice(0, MAX_ROWS);
+    writeCache(board);
+    return { rank, board, shared: false };
   }
-  return { rank, board };
 }
 
 export function loadNick(): string {

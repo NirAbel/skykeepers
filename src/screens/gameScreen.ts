@@ -161,9 +161,15 @@ export function createGameScreen(nav: Navigator): Screen {
         const saveEl = overlay.querySelector(".end-save") as HTMLElement;
         const nickInput = overlay.querySelector(".end-nick") as HTMLInputElement;
 
-        rowsEl.innerHTML = leaderboardRowsHtml(loadScores(), null);
+        rowsEl.innerHTML = `<div class="lb-empty">טוען טבלה…</div>`;
+        loadScores().then((board) => {
+          rowsEl.innerHTML = leaderboardRowsHtml(board, null);
+        });
 
-        overlay.querySelector(".end-save-btn")!.addEventListener("click", () => {
+        const saveBtn = overlay.querySelector(
+          ".end-save-btn",
+        ) as HTMLButtonElement;
+        saveBtn.addEventListener("click", async () => {
           const name = (nickInput.value.trim() || "אנונימי").slice(0, NICK_MAX);
           saveNick(name);
           const entry: ScoreEntry = {
@@ -173,9 +179,13 @@ export function createGameScreen(nav: Navigator): Screen {
             mistakes: result.mistakes,
             ts: Date.now(),
           };
-          const { rank, board } = saveScore(entry);
+          saveBtn.disabled = true;
+          saveBtn.textContent = "שומר…";
+          const { rank, board, shared } = await saveScore(entry);
           rowsEl.innerHTML = leaderboardRowsHtml(board, entry.ts);
-          saveEl.innerHTML = `<div class="end-saved">נשמרת בטבלה — מקום ${rank}</div>`;
+          saveEl.innerHTML = `<div class="end-saved">${
+            shared ? "נשמרת בטבלה" : "נשמר מקומית"
+          } — מקום ${rank}</div>`;
         });
 
         overlay.querySelector(".end-replay")!.addEventListener("click", () => {
