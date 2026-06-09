@@ -28,7 +28,7 @@ export const SPECS: Record<string, CraftSpec> = {
     kind: "missile",
     allegiance: "hostile",
     speed: 0.055,
-    color: "var(--yellow)",
+    color: "var(--red)",
     label: "טיל שיוט",
     intel: "טיל שיוט",
     points: 800,
@@ -45,10 +45,10 @@ export const SPECS: Record<string, CraftSpec> = {
     spawnWeight: 1.5,
   },
   helicopter: {
-    kind: "helicopter",
+    kind: "airliner", // civilian plane — drawn white like the airliner
     allegiance: "friendly",
     speed: 0.032,
-    color: "var(--cyan)",
+    color: "var(--white)",
     label: "מטוס אזרחי",
     intel: "מטוס אזרחי",
     points: -400,
@@ -71,10 +71,20 @@ export const SPEC_LIST = Object.values(SPECS);
 export const SCENARIO = {
   durationMs: 90_000,
   lives: 3,
-  firstSpawnDelayMs: 1500, // grace period before the first contact
-  spawnIntervalMs: [2400, 4000] as [number, number], // random gap between spawns
-  maxConcurrent: 5,
+  firstSpawnDelayMs: 2200, // grace period before the first contact
   interceptRadius: 0.07, // tap within this normalized radius destroys craft
+};
+
+// Difficulty ramps with scenario progress (0 → 1): spawns grow more frequent,
+// more craft can be airborne at once, and everything flies a bit faster. The
+// start values keep the opening calm and easy; the end values are the peak.
+export const DIFFICULTY = {
+  spawnGapMsStart: [3200, 4600] as [number, number],
+  spawnGapMsEnd: [1000, 1900] as [number, number],
+  maxConcurrentStart: 3,
+  maxConcurrentEnd: 7,
+  speedMulStart: 0.85,
+  speedMulEnd: 1.3,
 };
 
 // Two F-16 patrols inside the border — drag onto an enemy to intercept.

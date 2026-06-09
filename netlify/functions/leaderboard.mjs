@@ -5,8 +5,8 @@ import { getStore } from "@netlify/blobs";
 // (read-modify-write) — fine for MVP traffic; not strictly race-safe.
 
 const KEY = "scores";
-const STORED_ROWS = 50; // keep a deeper tail than we show, for accurate ranks
-const RETURN_ROWS = 10;
+const STORED_ROWS = 200; // full table cap; GET ?full=1 returns up to this
+const RETURN_ROWS = 10; // default GET / POST summary
 const NICK_MAX = 12;
 
 function clampInt(v, min, max) {
@@ -34,7 +34,8 @@ export default async (req) => {
 
   if (req.method === "GET") {
     const board = (await store.get(KEY, { type: "json" })) ?? [];
-    return Response.json(board.slice(0, RETURN_ROWS));
+    const full = new URL(req.url).searchParams.get("full") === "1";
+    return Response.json(board.slice(0, full ? STORED_ROWS : RETURN_ROWS));
   }
 
   if (req.method === "POST") {

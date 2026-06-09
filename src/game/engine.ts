@@ -7,6 +7,7 @@ import {
 } from "./geo.ts";
 import {
   SCENARIO,
+  DIFFICULTY,
   SCORING,
   pickSpec,
   FIGHTERS,
@@ -183,9 +184,22 @@ export class GameEngine {
   }
 
   // --- loop --------------------------------------------------------------
+  // Scenario progress 0 → 1, used to ramp difficulty over time.
+  private progress(): number {
+    return Math.min(1, this.elapsed / SCENARIO.durationMs);
+  }
+
   private randGap(): number {
-    const [lo, hi] = SCENARIO.spawnIntervalMs;
+    const t = this.progress();
+    const lo = lerp(DIFFICULTY.spawnGapMsStart[0], DIFFICULTY.spawnGapMsEnd[0], t);
+    const hi = lerp(DIFFICULTY.spawnGapMsStart[1], DIFFICULTY.spawnGapMsEnd[1], t);
     return lo + Math.random() * (hi - lo);
+  }
+
+  private maxConcurrent(): number {
+    return Math.round(
+      lerp(DIFFICULTY.maxConcurrentStart, DIFFICULTY.maxConcurrentEnd, this.progress()),
+    );
   }
 
   private tick = (ts: number): void => {
@@ -207,7 +221,7 @@ export class GameEngine {
 
     if (
       this.spawnTimer >= this.nextSpawnGap &&
-      this.crafts.length < SCENARIO.maxConcurrent &&
+      this.crafts.length < this.maxConcurrent() &&
       this.elapsed < SCENARIO.durationMs
     ) {
       this.spawnTimer = 0;
@@ -260,7 +274,13 @@ export class GameEngine {
     const dx = target.x - origin.x;
     const dy = target.y - origin.y;
     const len = Math.hypot(dx, dy) || 1;
-    const vel: Vec = { x: (dx / len) * spec.speed, y: (dy / len) * spec.speed };
+    const speedMul = lerp(
+      DIFFICULTY.speedMulStart,
+      DIFFICULTY.speedMulEnd,
+      this.progress(),
+    );
+    const speed = spec.speed * speedMul;
+    const vel: Vec = { x: (dx / len) * speed, y: (dy / len) * speed };
     const heading = (Math.atan2(vel.y, vel.x) * 180) / Math.PI + 90;
 
     const el = this.makeCraftEl(spec, heading);
@@ -678,6 +698,10 @@ export class GameEngine {
       mistakes: this.mistakes,
     });
   }
+}
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
 }
 
 function vibrate(ms: number): void {

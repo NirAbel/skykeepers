@@ -48,6 +48,17 @@ export async function loadScores(): Promise<ScoreEntry[]> {
   }
 }
 
+// Fetch the full table (not just the top MAX_ROWS) for the scoreboard view.
+export async function loadFullScores(): Promise<ScoreEntry[]> {
+  try {
+    const res = await fetch(`${ENDPOINT}?full=1`, { method: "GET" });
+    if (!res.ok) throw new Error(String(res.status));
+    return (await res.json()) as ScoreEntry[];
+  } catch {
+    return readCache();
+  }
+}
+
 // Submit a result. Returns the server-assigned rank + board; `shared` is false
 // when we fell back to a local-only ranking (function unreachable).
 export async function saveScore(entry: ScoreEntry): Promise<{

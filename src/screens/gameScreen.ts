@@ -10,6 +10,8 @@ import {
   NICK_MAX,
   type ScoreEntry,
 } from "../game/leaderboard.ts";
+import { escapeHtml } from "../core/html.ts";
+import { leaderboardRowsHtml, openScoreboard } from "./scoreboard.ts";
 
 const mapUrl = "/assets/map-israel.jpg";
 
@@ -36,12 +38,6 @@ function heartsHtml(lives: number): string {
     out += i < lives ? HEART : HEART.replace("heart", "heart lost");
   }
   return out;
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>]/g, (c) =>
-    c === "&" ? "&amp;" : c === "<" ? "&lt;" : "&gt;",
-  );
 }
 
 function intelHtml(items: IntelItem[]): string {
@@ -77,26 +73,8 @@ function endOverlayHtml(result: GameResult, nick: string): string {
         <div class="lb-rows"></div>
       </div>
       <button class="btn-secondary end-replay">שחק שוב</button>
+      <button class="btn-secondary end-scoreboard">טבלת ניקוד</button>
     </div>`;
-}
-
-function leaderboardRowsHtml(
-  board: ScoreEntry[],
-  highlightTs: number | null,
-): string {
-  if (board.length === 0) {
-    return `<div class="lb-empty">אין עדיין שיאים — היה הראשון</div>`;
-  }
-  return board
-    .map((e, i) => {
-      const me = highlightTs !== null && e.ts === highlightTs ? " is-me" : "";
-      return `<div class="lb-row${me}">
-        <span class="lb-rank">${i + 1}</span>
-        <span class="lb-name">${escapeHtml(e.name)}</span>
-        <span class="lb-score">${e.score}</span>
-      </div>`;
-    })
-    .join("");
 }
 
 // Full-bleed map + floating game HUD. The .game-arena layer holds the live
@@ -166,6 +144,7 @@ export function createGameScreen(nav: Navigator): Screen {
           rowsEl.innerHTML = leaderboardRowsHtml(board, null);
         });
 
+        let savedTs: number | null = null;
         const saveBtn = overlay.querySelector(
           ".end-save-btn",
         ) as HTMLButtonElement;
@@ -182,6 +161,7 @@ export function createGameScreen(nav: Navigator): Screen {
           saveBtn.disabled = true;
           saveBtn.textContent = "שומר…";
           const { rank, board, shared } = await saveScore(entry);
+          savedTs = entry.ts;
           rowsEl.innerHTML = leaderboardRowsHtml(board, entry.ts);
           saveEl.innerHTML = `<div class="end-saved">${
             shared ? "נשמרת בטבלה" : "נשמר מקומית"
@@ -191,6 +171,10 @@ export function createGameScreen(nav: Navigator): Screen {
         overlay.querySelector(".end-replay")!.addEventListener("click", () => {
           nav.go(createGameScreen);
         });
+
+        overlay
+          .querySelector(".end-scoreboard")!
+          .addEventListener("click", () => openScoreboard(savedTs));
       }
 
       // start once the arena has a measured size
