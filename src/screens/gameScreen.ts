@@ -111,16 +111,18 @@ export function createGameScreen(nav: Navigator): Screen {
       el = document.createElement("div");
       el.className = "screen game-screen";
       el.innerHTML = `
-        <img class="game-map" src="${mapUrl}" alt="מפת ישראל" draggable="false" />
-        <div class="game-arena"></div>
-        <div class="arena-overlay">
-          <div class="hud-panel hud-score">
-            <span class="hud-label">ניקוד</span>
-            <span class="hud-score-val">0</span>
+        <div class="game-stage">
+          <img class="game-map" src="${mapUrl}" alt="מפת ישראל" draggable="false" />
+          <div class="game-arena"></div>
+          <div class="arena-overlay">
+            <div class="hud-panel hud-score">
+              <span class="hud-label">ניקוד</span>
+              <span class="hud-score-val">0</span>
+            </div>
+            <div class="hud-panel hud-timer"><span class="hud-timer-val">90</span></div>
+            <div class="hud-lives">${heartsHtml(SCENARIO.lives)}</div>
+            <div class="intel-feed"></div>
           </div>
-          <div class="hud-panel hud-timer"><span class="hud-timer-val">90</span></div>
-          <div class="hud-lives">${heartsHtml(SCENARIO.lives)}</div>
-          <div class="intel-feed"></div>
         </div>
         <button class="btn-secondary debug-end">סיים תרחיש (debug)</button>
       `;
