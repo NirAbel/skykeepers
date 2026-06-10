@@ -2,7 +2,7 @@ import type { Battery, Craft, CraftSpec, Fighter } from "./types.ts";
 import type { Vec } from "./geo.ts";
 import {
   pointInPolygon,
-  randomSpawnEdge,
+  spawnOrigin,
   randomCity,
 } from "./geo.ts";
 import {
@@ -267,8 +267,9 @@ export class GameEngine {
 
   // --- enemies -----------------------------------------------------------
   private spawn(): void {
-    const spec = pickSpec();
-    const origin = randomSpawnEdge();
+    const progress = this.progress();
+    const spec = pickSpec(progress);
+    const origin = spawnOrigin(spec.kind, spec.allegiance, progress);
     const target =
       spec.allegiance === "hostile"
         ? randomCity().pos

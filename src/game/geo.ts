@@ -80,27 +80,50 @@ export function dist(a: Vec, b: Vec): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-// Random point on the arena edge, biased to where hostiles realistically
-// approach (sea to the west, borders to north/east/south). Returns a point
-// just outside the border so the aircraft flies inward.
-export function randomSpawnEdge(): Vec {
-  const side = Math.random();
-  if (side < 0.4) {
-    // west (Mediterranean) — most common; spans the inhabited coast band
-    // from Haifa down toward the Gaza envelope.
-    return { x: -0.05, y: 0.28 + Math.random() * 0.4 };
-  } else if (side < 0.65) {
-    // north-west — enters high over the sea and runs inland toward the
-    // northern cities, leaving room to intercept near Haifa/Tel Aviv.
-    return { x: -0.05, y: 0.12 + Math.random() * 0.14 };
-  } else if (side < 0.9) {
-    // east — enter below the top-right intel feed/HUD, which would otherwise
-    // hide an incoming craft. Band runs down the Jordan-valley border.
-    return { x: 1.05, y: 0.34 + Math.random() * 0.36 };
-  } else {
-    // south — up from the Negev/Eilat approaches.
-    return { x: 0.3 + Math.random() * 0.18, y: 1.05 };
+// --- entry edges (just outside the border, so craft fly inward) ---------
+function westEdge(): Vec {
+  // Mediterranean coast band, Haifa down toward the Gaza envelope.
+  return { x: -0.05, y: 0.28 + Math.random() * 0.4 };
+}
+function northWestEdge(): Vec {
+  // high over the sea, running inland toward the northern cities.
+  return { x: -0.05, y: 0.12 + Math.random() * 0.14 };
+}
+function eastEdge(): Vec {
+  // Jordan-valley border; enters below the top-right HUD so it stays visible.
+  return { x: 1.05, y: 0.34 + Math.random() * 0.36 };
+}
+function southEdge(): Vec {
+  // up from the Negev / Eilat approaches.
+  return { x: 0.3 + Math.random() * 0.18, y: 1.05 };
+}
+function northEdge(): Vec {
+  // down from the northern border — azimuth ~330–360. The new map shows the
+  // north, so this vector is now in play (it was avoided on the old map).
+  return { x: 0.4 + Math.random() * 0.2, y: -0.05 };
+}
+
+// Pick where a craft enters, by threat type and how far the scenario has run.
+// The opening leans on the western (sea) approach so it stays readable; as
+// progress climbs, the north and south vectors open up so threats arrive from
+// several directions at once. Cruise missiles bore in from the eastern border
+// (with a few slipping down from the north late game), forcing the player to
+// cover the east with batteries while patrols hold the sea and the Negev.
+export function spawnOrigin(
+  kind: string,
+  allegiance: string,
+  progress: number,
+): Vec {
+  if (allegiance === "hostile" && kind === "missile") {
+    if (progress > 0.45 && Math.random() < 0.25) return northEdge();
+    return eastEdge();
   }
+  const r = Math.random();
+  const north = 0.12 + 0.2 * progress; // ~12% → ~32%
+  const south = 0.12 + 0.13 * progress; // ~12% → ~25%
+  if (r < north) return northEdge();
+  if (r < north + south) return southEdge();
+  return Math.random() < 0.6 ? westEdge() : northWestEdge();
 }
 
 export function randomCity(): City {

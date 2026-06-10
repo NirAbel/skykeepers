@@ -79,12 +79,16 @@ export const SCENARIO = {
 // more craft can be airborne at once, and everything flies a bit faster. The
 // start values keep the opening calm and easy; the end values are the peak.
 export const DIFFICULTY = {
-  spawnGapMsStart: [3200, 4600] as [number, number],
-  spawnGapMsEnd: [1000, 1900] as [number, number],
-  maxConcurrentStart: 3,
-  maxConcurrentEnd: 7,
-  speedMulStart: 0.85,
-  speedMulEnd: 1.3,
+  spawnGapMsStart: [3600, 5200] as [number, number], // calm opening
+  spawnGapMsEnd: [800, 1500] as [number, number], // relentless finish
+  maxConcurrentStart: 2,
+  maxConcurrentEnd: 8,
+  speedMulStart: 0.8,
+  speedMulEnd: 1.4,
+  // Cruise-missile share of spawns ramps with progress: nearly absent at the
+  // start, a major threat by the end (multiplies the missile spawnWeight).
+  missileWeightStart: 0.15,
+  missileWeightEnd: 2.2,
 };
 
 // Two F-16 patrols inside the border — drag onto an enemy to intercept.
@@ -118,11 +122,18 @@ export const INTERCEPT = {
   tapSlopPx: 9, // movement under this = a tap, not a drag
 };
 
-export function pickSpec(): CraftSpec {
-  const total = SPEC_LIST.reduce((s, c) => s + c.spawnWeight, 0);
+// Weighted spec pick. Cruise missiles are rare in the opening and grow into a
+// dominant threat as `progress` (0 → 1) climbs, so the late game is missile-heavy.
+export function pickSpec(progress = 0): CraftSpec {
+  const missileMul =
+    DIFFICULTY.missileWeightStart +
+    (DIFFICULTY.missileWeightEnd - DIFFICULTY.missileWeightStart) * progress;
+  const weightOf = (c: CraftSpec) =>
+    c.kind === "missile" ? c.spawnWeight * missileMul : c.spawnWeight;
+  const total = SPEC_LIST.reduce((s, c) => s + weightOf(c), 0);
   let r = Math.random() * total;
   for (const spec of SPEC_LIST) {
-    r -= spec.spawnWeight;
+    r -= weightOf(spec);
     if (r <= 0) return spec;
   }
   return SPEC_LIST[0];
