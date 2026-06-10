@@ -66,6 +66,11 @@ body {
 .btn-primary:active {
   filter: brightness(1.1);
 }
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
 
 /* --- Entry screen (spec 3) --- */
 .entry-screen {

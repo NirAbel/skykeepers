@@ -156,8 +156,18 @@ export function createGameScreen(nav: Navigator): Screen {
         const saveBtn = overlay.querySelector(
           ".end-save-btn",
         ) as HTMLButtonElement;
+
+        // Can't save a score without a name: keep the button disabled until the
+        // player types something.
+        const syncSaveEnabled = (): void => {
+          saveBtn.disabled = nickInput.value.trim().length === 0;
+        };
+        syncSaveEnabled();
+        nickInput.addEventListener("input", syncSaveEnabled);
+
         saveBtn.addEventListener("click", async () => {
-          const name = (nickInput.value.trim() || "אנונימי").slice(0, NICK_MAX);
+          const name = nickInput.value.trim().slice(0, NICK_MAX);
+          if (!name) return; // guard: button is disabled, but be safe
           saveNick(name);
           const entry: ScoreEntry = {
             name,
