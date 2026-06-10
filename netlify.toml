@@ -7,3 +7,20 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Never let the browser hold a stale service worker or shell — otherwise an
+# update can go unnoticed. Hashed assets under /assets are safe to cache hard.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
