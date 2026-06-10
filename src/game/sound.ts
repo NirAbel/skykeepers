@@ -136,3 +136,31 @@ export function playBreachAlarm(): void {
   beep(c, t, 440, 0.18, "square", 0.16);
   beep(c, t + 0.16, 330, 0.26, "square", 0.18);
 }
+
+// Harsh, dissonant "disaster" sting for shooting down a civilian plane — a
+// downward klaxon plus a clashing low cluster so it reads as a mistake, clearly
+// distinct from the breach klaxon above.
+export function playDisasterAlarm(): void {
+  const c = getCtx();
+  if (!c) return;
+  if (c.state !== "running") {
+    c.resume().catch(() => {});
+    return;
+  }
+  const t = c.currentTime;
+  // A dissonant low dyad (minor 2nd-ish clash) held under a falling wail.
+  beep(c, t, 220, 0.55, "sawtooth", 0.16);
+  beep(c, t, 233, 0.55, "sawtooth", 0.14); // clashes with 220 → unsettling
+  // Falling siren on top: drag the frequency down for a "going down" feel.
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(520, t);
+  osc.frequency.exponentialRampToValueAtTime(140, t + 0.6);
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.62);
+  osc.connect(gain).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.64);
+}

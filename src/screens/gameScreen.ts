@@ -44,7 +44,7 @@ function intelHtml(items: IntelItem[]): string {
   return items
     .map(
       (i) =>
-        `<div class="intel-item intel-${i.allegiance}"><span class="intel-dot"></span><span>${escapeHtml(i.text)}</span></div>`,
+        `<div class="intel-item intel-${i.allegiance}${i.tone ? ` intel-${i.tone}` : ""}"><span class="intel-dot"></span><span>${escapeHtml(i.text)}</span></div>`,
     )
     .join("");
 }

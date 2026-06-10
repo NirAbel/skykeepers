@@ -468,6 +468,25 @@ body {
 .intel-friendly .intel-dot {
   background: var(--cyan);
 }
+/* One-off disaster alert (downed civilian): loud red, bold, pulsing. */
+.intel-disaster {
+  border-color: rgba(239, 68, 68, 0.9);
+  background: rgba(120, 12, 12, 0.7);
+  font-weight: 700;
+  color: #ffd7d7;
+  animation:
+    intel-in 0.18s ease-out,
+    disaster-pulse 0.9s ease-in-out infinite;
+}
+.intel-disaster .intel-dot {
+  background: var(--red);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 1);
+}
+@keyframes disaster-pulse {
+  50% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
+  }
+}
 
 .debug-end {
   position: absolute;

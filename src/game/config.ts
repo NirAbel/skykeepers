@@ -84,11 +84,11 @@ export const SPAWN_SCHEDULE: ReadonlyArray<{ untilSec: number; gapMs: number }> 
     { untilSec: 18, gapMs: 8000 }, // calm opening
     { untilSec: 30, gapMs: 5000 },
     { untilSec: 45, gapMs: 3000 },
-    { untilSec: 60, gapMs: 2000 }, // up to the final surge
+    { untilSec: 70, gapMs: 2000 }, // hold steady 45→70s, then the final surge
   ];
 // Final push: with this many seconds (or fewer) left, spawn every second.
-// From 60s elapsed onward (last 30s) it's a relentless 1-per-second wall.
-export const FINAL_SURGE = { fromSecLeft: 30, gapMs: 1000 };
+// From 70s elapsed onward (last 20s) it's a relentless 1-per-second wall.
+export const FINAL_SURGE = { fromSecLeft: 20, gapMs: 1000 };
 
 // Difficulty ramps with scenario progress (0 → 1): more craft can be airborne
 // at once and everything flies a bit faster. The cap is generous enough that

@@ -18,7 +18,7 @@ import {
   FINAL_SURGE,
 } from "./config.ts";
 import { iconFor, F16_ICON, BATTERY_ICON, DOME_MISSILE_ICON } from "./icons.ts";
-import { unlockAudio, playBreachAlarm } from "./sound.ts";
+import { unlockAudio, playBreachAlarm, playDisasterAlarm } from "./sound.ts";
 
 export interface GameResult {
   score: number;
@@ -30,6 +30,7 @@ export interface IntelItem {
   id: number;
   text: string; // Hebrew, e.g. "רחפן נפץ מגיע ממזרח"
   allegiance: "hostile" | "friendly" | "neutral";
+  tone?: "disaster"; // one-off critical alerts get extra emphasis
 }
 
 export interface EngineCallbacks {
@@ -62,6 +63,11 @@ export class GameEngine {
   private running = false;
   private lastSecondShown = -1;
   private lastIntelSig = "";
+  // One-off alerts (e.g. a downed civilian) that briefly ride the top of the
+  // intel feed. The per-tick feed rebuild would otherwise wipe them, so they
+  // live here with an expiry and are merged in by maybeEmitIntel().
+  private transientNotes: IntelItem[] = [];
+  private transientUntil = new Map<number, number>();
 
   private selected: Battery | null = null;
   private selectedFighter: Fighter | null = null;
@@ -260,15 +266,40 @@ export class GameEngine {
     return v.y >= 0 ? "מצפון" : "מדרום";
   }
 
+  // Add a short-lived alert to the top of the intel feed (e.g. a downed
+  // civilian). It survives the per-tick feed rebuild until it expires.
+  private pushTransientNote(
+    text: string,
+    allegiance: IntelItem["allegiance"],
+    tone?: IntelItem["tone"],
+    ttlMs = 4000,
+  ): void {
+    const id = this.nextId++;
+    this.transientNotes.unshift({ id, text, allegiance, tone });
+    this.transientUntil.set(id, this.elapsed + ttlMs);
+  }
+
   // Push the live-enemy intelligence feed, but only when it actually changes.
   private maybeEmitIntel(): void {
-    const items: IntelItem[] = this.crafts
+    // Drop expired one-off alerts first.
+    if (this.transientNotes.length) {
+      this.transientNotes = this.transientNotes.filter((n) => {
+        const until = this.transientUntil.get(n.id) ?? 0;
+        if (this.elapsed >= until) {
+          this.transientUntil.delete(n.id);
+          return false;
+        }
+        return true;
+      });
+    }
+    const live: IntelItem[] = this.crafts
       .filter((c) => c.alive && c.spec.allegiance === "hostile")
       .map((c) => ({
         id: c.id,
         text: `${c.spec.intel} מגיע ${this.approachFrom(c.vel)}`,
         allegiance: c.spec.allegiance,
       }));
+    const items = [...this.transientNotes, ...live];
     const sig = items.map((i) => `${i.id}:${i.text}`).join("|");
     if (sig === this.lastIntelSig) return;
     this.lastIntelSig = sig;
@@ -406,7 +437,10 @@ export class GameEngine {
       this.lives = Math.max(0, SCENARIO.lives - this.mistakes);
       this.cb.onLives(this.lives);
       c.el.classList.add("craft-wrong");
-      vibrate(160);
+      // disaster: a civilian aircraft was shot down — harsh sting + alert note
+      playDisasterAlarm();
+      this.pushTransientNote("אסון — הופל מטוס אזרחי", "friendly", "disaster");
+      vibrate([160, 80, 160]);
     }
     this.cb.onScore(this.score);
     setTimeout(() => c.el.remove(), 300);
