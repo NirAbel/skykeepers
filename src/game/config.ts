@@ -90,15 +90,16 @@ export const DIFFICULTY = {
 // Two F-16 patrols inside the border — drag onto an enemy to intercept.
 // north covers Galilee/Haifa; south covers the Negev/Eilat approaches.
 export const FIGHTERS = [
-  { home: { x: 0.41, y: 0.11 }, speed: 0.11 }, // north
-  { home: { x: 0.48, y: 0.47 }, speed: 0.11 }, // south
+  { home: { x: 0.21, y: 0.42 }, speed: 0.11 }, // over the sea — guards the coast
+  { home: { x: 0.42, y: 0.53 }, speed: 0.11 }, // Beer Sheva / Negev
 ];
 
 // Two Iron Dome batteries with radar coverage — can only hit enemies inside
-// their radar circle. radarRadius is normalized to arena WIDTH.
+// their radar circle. radarRadius is normalized to arena WIDTH. Placed on the
+// border well clear of the patrols so they don't fight for the same taps.
 export const BATTERIES = [
-  { pos: { x: 0.43, y: 0.22 }, radarRadius: 0.33 }, // left-middle, near Tel Aviv
-  { pos: { x: 0.51, y: 0.36 }, radarRadius: 0.33 }, // middle, east of Beer Sheva
+  { pos: { x: 0.4, y: 0.4 }, radarRadius: 0.33 }, // Tel Aviv / centre
+  { pos: { x: 0.41, y: 0.8 }, radarRadius: 0.45 }, // Eilat — southern approaches
 ];
 
 export const DOME = {

@@ -31,6 +31,7 @@ export interface IntelItem {
 
 export interface EngineCallbacks {
   onScore(score: number): void;
+  onIntercepted(count: number): void;
   onTime(secondsLeft: number): void;
   onLives(lives: number): void;
   onIntel(items: IntelItem[]): void;
@@ -75,6 +76,7 @@ export class GameEngine {
     this.nextSpawnGap = SCENARIO.firstSpawnDelayMs;
     this.buildUnits();
     this.cb.onScore(0);
+    this.cb.onIntercepted(0);
     this.cb.onLives(this.lives);
     this.cb.onTime(Math.ceil(SCENARIO.durationMs / 1000));
     this.arena.addEventListener("pointerdown", this.onDown);
@@ -307,7 +309,7 @@ export class GameEngine {
 
   private makeCraftEl(spec: CraftSpec, heading: number): HTMLElement {
     const el = document.createElement("div");
-    el.className = `craft craft-${spec.allegiance}`;
+    el.className = `craft craft-${spec.allegiance} craft-${spec.kind}`;
     el.style.color = spec.color;
     el.innerHTML = `<span class="craft-icon" style="transform:rotate(${heading}deg)">${iconFor(
       spec.kind,
@@ -380,6 +382,7 @@ export class GameEngine {
       }
       this.score += gain;
       this.intercepted++;
+      this.cb.onIntercepted(this.intercepted);
       c.el.classList.add("craft-hit");
       vibrate(40);
     } else {

@@ -13,9 +13,9 @@ import {
 import { escapeHtml } from "../core/html.ts";
 import { leaderboardRowsHtml, openScoreboard } from "./scoreboard.ts";
 
-const mapUrl = "/assets/map-israel.jpg";
+const mapUrl = "/assets/map-israel.svg";
 
-const HEART = `<svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.2C.3 8.6 1.6 5 5 5c2 0 3.2 1.2 4 2.3C9.8 6.2 11 5 13 5c3.4 0 4.7 3.6 3 6.8C19.5 16.4 12 21 12 21z"/></svg>`;
+const HEART = `<svg class="heart" viewBox="0 0 32 29" aria-hidden="true"><path d="M15.7415 5.3805L13.6226 3.13114C10.6884 0.0161835 5.92959 0.0161835 2.99535 3.13114C0.0611187 6.24609 0.0611187 11.2979 2.99535 14.4129L15.4252 27.6083C15.6848 27.8839 16.1034 27.8839 16.363 27.6083L28.7929 14.4129C31.7271 11.2979 31.7271 6.24609 28.7929 3.13114C25.8586 0.0161835 21.0999 0.0161835 18.1656 3.13114L16.0468 5.3805C15.9627 5.46978 15.8256 5.46978 15.7415 5.3805Z"/></svg>`;
 
 function drawDebugGeo(arena: HTMLElement): void {
   const w = arena.clientWidth;
@@ -93,12 +93,18 @@ export function createGameScreen(nav: Navigator): Screen {
           <img class="game-map" src="${mapUrl}" alt="מפת ישראל" draggable="false" />
           <div class="game-arena"></div>
           <div class="arena-overlay">
-            <div class="hud-panel hud-score">
-              <span class="hud-label">ניקוד</span>
-              <span class="hud-score-val">0</span>
-            </div>
-            <div class="hud-panel hud-timer"><span class="hud-timer-val">90</span></div>
             <div class="hud-lives">${heartsHtml(SCENARIO.lives)}</div>
+            <div class="hud-panel hud-timer"><span class="hud-timer-val">90</span></div>
+            <div class="hud-readouts">
+              <div class="hud-readout">
+                <span class="hud-label">ניקוד</span>
+                <span class="hud-score-val">0</span>
+              </div>
+              <div class="hud-readout">
+                <span class="hud-label">יירוטים</span>
+                <span class="hud-intercept-val">0</span>
+              </div>
+            </div>
             <div class="intel-feed"></div>
           </div>
         </div>
@@ -107,6 +113,7 @@ export function createGameScreen(nav: Navigator): Screen {
       root.appendChild(el);
 
       const scoreEl = el.querySelector(".hud-score-val")!;
+      const interceptEl = el.querySelector(".hud-intercept-val")!;
       const timerEl = el.querySelector(".hud-timer-val")!;
       const livesEl = el.querySelector(".hud-lives")!;
       const intelEl = el.querySelector(".intel-feed")!;
@@ -121,6 +128,7 @@ export function createGameScreen(nav: Navigator): Screen {
 
       engine = new GameEngine(arena, {
         onScore: (s) => (scoreEl.textContent = String(s)),
+        onIntercepted: (n) => (interceptEl.textContent = String(n)),
         onTime: (sec) => (timerEl.textContent = String(sec)),
         onLives: (lives) => (livesEl.innerHTML = heartsHtml(lives)),
         onIntel: (items) => (intelEl.innerHTML = intelHtml(items)),
