@@ -108,7 +108,7 @@ export function createGameScreen(nav: Navigator): Screen {
             <div class="intel-feed"></div>
           </div>
         </div>
-        <button class="btn-secondary debug-end">סיים את המשחק</button>
+        <button class="btn-secondary debug-end">סיים משחק</button>
       `;
       root.appendChild(el);
 
