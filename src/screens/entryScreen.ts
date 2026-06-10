@@ -1,6 +1,7 @@
 import type { Navigator, Screen } from "../core/screen.ts";
 import { createGameScreen } from "./gameScreen.ts";
 import { openScoreboard } from "./scoreboard.ts";
+import { unlockAudio } from "../game/sound.ts";
 
 export function createEntryScreen(nav: Navigator): Screen {
   let el: HTMLElement;
@@ -18,6 +19,9 @@ export function createEntryScreen(nav: Navigator): Screen {
         <p class="entry-tagline">הגן על שמי המדינה!</p>
       `;
       el.querySelector(".entry-start")!.addEventListener("click", () => {
+        // Unlock audio synchronously inside this tap — iOS won't resume the
+        // AudioContext from the later requestAnimationFrame in engine.start().
+        unlockAudio();
         nav.go(createGameScreen);
       });
       el.querySelector(".entry-scoreboard")!.addEventListener("click", () =>
