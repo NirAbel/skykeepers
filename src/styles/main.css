@@ -706,8 +706,9 @@ body {
   padding: 8px;
 }
 
-/* "טבלת ניקוד" buttons share the play-button width on each screen */
-.entry-scoreboard {
+/* secondary entry buttons share the play-button width on each screen */
+.entry-scoreboard,
+.entry-instructions {
   max-width: 360px;
 }
 .end-overlay .end-scoreboard {
