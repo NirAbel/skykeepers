@@ -50,13 +50,13 @@ export function openInstructions(): void {
   const tools =
     legendRow(
       F16_ICON,
-      "var(--green)",
+      "var(--cyan)",
       'מטוס יירוט F-16',
       " — שני מטוסי הקרב שלך מסיירים לאורך הגבול.",
     ) +
     legendRow(
       BATTERY_ICON,
-      "var(--cyan)",
+      "var(--green)",
       "סוללת כיפת ברזל",
       " — שתי סוללות שמיירטות מטרות בתוך טווח הראדאר בלבד.",
     );
