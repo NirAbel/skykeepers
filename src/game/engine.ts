@@ -331,10 +331,12 @@ export class GameEngine {
       c.pos.y += c.vel.y * dt;
       this.positionCraft(c);
 
-      // mark whether an Iron Dome battery can reach this enemy
-      const inDome = this.inAnyRadar(c.pos);
+      // mark whether an Iron Dome battery can reach this enemy — only enemies
+      // get the coverage box; friendly/neutral civilians never do.
+      const isHostile = c.spec.allegiance === "hostile";
+      const inDome = isHostile && this.inAnyRadar(c.pos);
       c.el.classList.toggle("dome-in", inDome);
-      c.el.classList.toggle("dome-out", !inDome);
+      c.el.classList.toggle("dome-out", isHostile && !inDome);
 
       if (c.spec.allegiance === "hostile" && !c.crossed && pointInPolygon(c.pos)) {
         c.crossed = true;

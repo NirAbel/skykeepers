@@ -118,12 +118,24 @@ export function spawnOrigin(
     if (progress > 0.45 && Math.random() < 0.25) return northEdge();
     return eastEdge();
   }
-  const r = Math.random();
-  const north = 0.12 + 0.2 * progress; // ~12% → ~32%
-  const south = 0.12 + 0.13 * progress; // ~12% → ~25%
-  if (r < north) return northEdge();
-  if (r < north + south) return southEdge();
-  return Math.random() < 0.6 ? westEdge() : northWestEdge();
+  // Spread the threat across all four approaches so the player must watch
+  // every sector and juggle both patrols and batteries — not just camp the
+  // sea. The coast leads slightly; north/east/south each carry a real share
+  // that grows as the scenario heats up.
+  const choices: Array<{ edge: () => Vec; w: number }> = [
+    { edge: westEdge, w: 1.6 }, // Mediterranean coast
+    { edge: northWestEdge, w: 0.8 }, // high over the sea
+    { edge: northEdge, w: 1.3 + 0.6 * progress },
+    { edge: eastEdge, w: 1.2 + 0.6 * progress },
+    { edge: southEdge, w: 1.0 + 0.6 * progress },
+  ];
+  const total = choices.reduce((s, c) => s + c.w, 0);
+  let r = Math.random() * total;
+  for (const c of choices) {
+    r -= c.w;
+    if (r <= 0) return c.edge();
+  }
+  return westEdge();
 }
 
 export function randomCity(): City {
