@@ -16,6 +16,7 @@ import {
   INTERCEPT,
 } from "./config.ts";
 import { iconFor, F16_ICON, BATTERY_ICON, DOME_MISSILE_ICON } from "./icons.ts";
+import { unlockAudio, playBreachAlarm } from "./sound.ts";
 
 export interface GameResult {
   score: number;
@@ -73,6 +74,7 @@ export class GameEngine {
 
   start(): void {
     this.running = true;
+    unlockAudio(); // mount runs inside the start-button gesture
     this.nextSpawnGap = SCENARIO.firstSpawnDelayMs;
     this.buildUnits();
     this.cb.onScore(0);
@@ -372,7 +374,9 @@ export class GameEngine {
     this.lives = Math.max(0, SCENARIO.lives - this.mistakes);
     this.cb.onScore(this.score);
     this.cb.onLives(this.lives);
-    vibrate(120);
+    // border breach — alert the player with a klaxon + a distinct double buzz
+    playBreachAlarm();
+    vibrate([90, 60, 160]);
   }
 
   // resolve a kill caused by an interceptor reaching an enemy
@@ -556,6 +560,7 @@ export class GameEngine {
   }
 
   private onDown = (e: PointerEvent): void => {
+    unlockAudio(); // ensure the audio context is live on mobile
     const p = this.toNorm(e.clientX, e.clientY);
 
     // 1) a selected fighter + tap on any enemy => fly out and engage
@@ -710,10 +715,10 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-function vibrate(ms: number): void {
+function vibrate(pattern: number | number[]): void {
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     try {
-      navigator.vibrate(ms);
+      navigator.vibrate(pattern);
     } catch {
       /* ignore */
     }
