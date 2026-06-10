@@ -94,7 +94,7 @@ export const DIFFICULTY = {
 // Two F-16 patrols inside the border — drag onto an enemy to intercept.
 // north covers Galilee/Haifa; south covers the Negev/Eilat approaches.
 export const FIGHTERS = [
-  { home: { x: 0.21, y: 0.42 }, speed: 0.11 }, // over the sea — guards the coast
+  { home: { x: 0.17, y: 0.27 }, speed: 0.11 }, // north sea off Haifa — clear of the Tel Aviv battery
   { home: { x: 0.42, y: 0.53 }, speed: 0.11 }, // Beer Sheva / Negev
 ];
 
