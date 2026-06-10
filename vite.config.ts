@@ -5,31 +5,15 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: "autoUpdate",
+      // No offline caching: a precaching service worker is exactly what pinned
+      // mobile devices to stale builds. `selfDestroying` ships a service worker
+      // whose only job is to unregister itself and delete every cache. After it
+      // runs once on a device (replacing any old precache SW), there is no
+      // service worker left, so every request goes to the network and the user
+      // always gets the latest deploy. Hashed asset filenames + the no-cache
+      // headers in netlify.toml keep the browser HTTP cache honest too.
+      selfDestroying: true,
       includeAssets: ["assets/**/*"],
-      // Don't precache the build (that's what served stale versions on mobile).
-      // Instead always go to the network for the latest deploy, and only fall
-      // back to the cache when offline. The new SW also cleans up the old
-      // precache caches and claims open clients immediately, so existing
-      // installs self-heal on their next online load.
-      workbox: {
-        globPatterns: [],
-        navigateFallback: null,
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
-        runtimeCaching: [
-          {
-            urlPattern: () => true,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "sky-runtime",
-              networkTimeoutSeconds: 4,
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
-      },
       manifest: {
         name: "מערך הבקרה האווירית",
         short_name: "מערך הבקרה",
