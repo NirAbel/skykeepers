@@ -356,20 +356,22 @@ body {
   -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
 }
-/* Score + interceptions readouts — stacked in the top-right corner */
+/* Score + interceptions readouts — stacked in the top-right corner. A shared
+   two-column grid (label | value) keeps the value column identical on both
+   rows, so the numbers line up no matter how wide the labels are. */
 .hud-readouts {
   position: absolute;
   top: calc(12px + var(--safe-top));
   inset-inline-start: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 6px;
 }
 .hud-readout {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
+  display: contents;
 }
 .hud-label {
   font-size: 11px;
@@ -382,6 +384,7 @@ body {
   font-weight: 700;
   color: var(--cyan);
   font-variant-numeric: tabular-nums;
+  text-align: start;
 }
 .hud-timer {
   left: 50%;
