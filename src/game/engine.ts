@@ -14,6 +14,8 @@ import {
   BATTERIES,
   DOME,
   INTERCEPT,
+  SPAWN_SCHEDULE,
+  FINAL_SURGE,
 } from "./config.ts";
 import { iconFor, F16_ICON, BATTERY_ICON, DOME_MISSILE_ICON } from "./icons.ts";
 import { unlockAudio, playBreachAlarm } from "./sound.ts";
@@ -193,11 +195,17 @@ export class GameEngine {
     return Math.min(1, this.elapsed / SCENARIO.durationMs);
   }
 
+  // Time-based spawn cadence (config SPAWN_SCHEDULE): 8 → 7 → 5 → 4 seconds,
+  // then a 1-per-second surge over the final 15s. Deterministic so the ramp
+  // feels exactly as designed.
   private randGap(): number {
-    const t = this.progress();
-    const lo = lerp(DIFFICULTY.spawnGapMsStart[0], DIFFICULTY.spawnGapMsEnd[0], t);
-    const hi = lerp(DIFFICULTY.spawnGapMsStart[1], DIFFICULTY.spawnGapMsEnd[1], t);
-    return lo + Math.random() * (hi - lo);
+    const secLeft = (SCENARIO.durationMs - this.elapsed) / 1000;
+    if (secLeft <= FINAL_SURGE.fromSecLeft) return FINAL_SURGE.gapMs;
+    const elapsedSec = this.elapsed / 1000;
+    for (const step of SPAWN_SCHEDULE) {
+      if (elapsedSec < step.untilSec) return step.gapMs;
+    }
+    return SPAWN_SCHEDULE[SPAWN_SCHEDULE.length - 1].gapMs;
   }
 
   private maxConcurrent(): number {
